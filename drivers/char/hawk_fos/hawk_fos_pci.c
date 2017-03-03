@@ -164,7 +164,7 @@ static long fos_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
    struct FOS_debug_struct debug_cmd;
    struct FOS_int_status_struct int_status;
 
-   //printk(KERN_DEBUG "<%s> ioctl: entered fos_ioctl\n", MODULE_NAME);
+   printk(KERN_DEBUG "<%s> ioctl: entered fos_ioctl\n", MODULE_NAME);
 
    switch (cmd) {
       case FOS_USER_RESET:
@@ -418,8 +418,10 @@ irqreturn_t fos_isr(int irq, void *data)
       fos_write_reg(fos, R_INTERRUPT, int_active_mask|BIT_CLR_DEBUG);
       // increment count
       fos->debug_int_count++;
-      status = fosdma_read_reg(fos, 0x2048);
-      printk(KERN_DEBUG "FOS_ISR: user_irq_pending after DEBUG_INT clear = 0x%08x\n",status);
+      printk(KERN_DEBUG "FOS_ISR: debug interrupt received\n");
+      //printk(KERN_DEBUG "FOS_ISR: turning off all interrupt sources\n");
+      //fos_write_reg(fos, R_INTERRUPT, int_active_mask|BIT_CLR_DEBUG);
+      //fos->int_active_mask = 0;
    }
 
    if (status & STAT_EDFA_INT_FLAG) {
@@ -560,14 +562,6 @@ static int fos_probe(struct pci_dev *pdev, const struct pci_device_id *id)
    ret = pci_resource_start(pdev, 0);
    dev_err(dev, "BAR0 is located at physical addr 0x%x, virtual addr 0x%llx\n",ret, (u64)fos->base);
 
-   if(fos->dev64_support)
-   {
-      // dma base register is BAR1 (BAR2_BAR3 for 64-bit)
-      fos->dma_base = pci_iomap(pdev,2,pci_resource_len(pdev, 2));
-      ret = pci_resource_start(pdev, 2);
-      dev_err(dev, "BAR1 is located at physical addr 0x%x, virtual addr 0x%llx\n",ret, (u64)fos->dma_base);
-   }
-
    fos->config_state = 0;
 
    dev_info(&pdev->dev, "Hawk FOS finished call to PCI get resources\n");
@@ -639,23 +633,18 @@ static int fos_probe(struct pci_dev *pdev, const struct pci_device_id *id)
    // allocate mmap area
    //
 
-   if (fos-> dev64_support) {
-      // allocate 256 Mbytes for 64-bit PCI
-      dev_info(dev, "Attempting to allocate a 256Mbyte CMA buffer\n");
+   // allocate CMA buffer for DMA
+   dev_info(dev, "Attempting to allocate a %dMbyte CMA buffer\n",(DMA_LENGTH>>20));
 
-      fos_cma_area = dma_alloc_from_contiguous(&pdev->dev, ((128<<20)>>PAGE_SHIFT), PAGE_SIZE);
-      if (fos_cma_area) {
-         dev_info(&pdev->dev, "CMA buffer allocation Succeeded!\n");
-         fos->dma_addr = page_to_virt(fos_cma_area);
-         fos->dma_handle = page_to_phys(fos_cma_area);
-      } else {
-         dev_info(&pdev->dev, "CMA buffer allocation failed!!!!!!\n");
-         fos->dma_addr = 0;
-         fos->dma_handle = 0;
-      }
+   fos_cma_area = dma_alloc_from_contiguous(&pdev->dev, ((DMA_LENGTH)>>PAGE_SHIFT), PAGE_SIZE);
+   if (fos_cma_area) {
+      dev_info(&pdev->dev, "CMA buffer allocation Succeeded!\n");
+      fos->dma_addr = page_to_virt(fos_cma_area);
+      fos->dma_handle = page_to_phys(fos_cma_area);
    } else {
-      // allocate 4 Mbytes
-      fos->dma_addr = dma_alloc_coherent(&pdev->dev, DMA_LENGTH, &fos->dma_handle, (GFP_KERNEL|GFP_DMA32));
+      dev_info(&pdev->dev, "CMA buffer allocation failed!!!!!!\n");
+      fos->dma_addr = 0;
+      fos->dma_handle = 0;
    }
 
    dev_info(&pdev->dev, "dma_addr = 0x%llx, dma_handle = 0x%llx\n",(u64)(fos->dma_addr),(u64)fos->dma_handle);

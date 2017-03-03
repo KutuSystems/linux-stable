@@ -116,7 +116,7 @@
 
 #define DEFAULT_ROW_STRIDE       0x00100000
 
-#define DMA_LENGTH	(4*1024*1024)
+#define DMA_LENGTH	(1024*1024*1024)
 
 #define FOS_DEBUG_READ           1
 #define FOS_DEBUG_WRITE          2
