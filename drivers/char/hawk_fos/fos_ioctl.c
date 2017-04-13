@@ -31,7 +31,7 @@
 #include <linux/iio/buffer.h>
 
 #define DEBUG
-//#define TRANSFER_USER_DEBUG
+#define TRANSFER_USER_DEBUG
 
 //
 // FOS_Status()
@@ -264,6 +264,7 @@ int FOS_tfer_mig2host(struct fos_drvdata *fos, struct FOS_transfer_data_struct *
    u32 transfer_size,last_addr;
    u32 num_columns, num_rows, row_stride;
    u64 host_addr;
+   u32 host_addr_lo,host_addr_hi;
 
    num_columns = cmd->num_columns & 0xffffffc0;
    if (num_columns != cmd->num_columns) {
@@ -288,22 +289,27 @@ int FOS_tfer_mig2host(struct fos_drvdata *fos, struct FOS_transfer_data_struct *
       return -3;
    }
 
-   host_addr = fos->dma_handle;
-   host_addr += cmd->host_offset_addr;
+   host_addr = (u64)fos->dma_handle;
+   host_addr += (u64)cmd->host_offset_addr;
+
+   host_addr_lo = (u32)(host_addr & 0xffffffff);
+   host_addr_hi = (u32)(host_addr >> 32);
 
 #ifdef DEBUG
    printk(KERN_DEBUG "MIG address for mig2host transfer is 0x%08x, size of request is %d bytes\n",cmd->mig_base_address,transfer_size);
    printk(KERN_DEBUG "stride = 0x%x, num_columns = %d, num_rows = %d\n",row_stride,num_columns,num_rows);
    printk(KERN_DEBUG "Host address for mig2host transfer is 0x%llx\n",host_addr);
+   printk(KERN_DEBUG "Low DW host address for mig2host transfer is 0x%x\n",host_addr_lo);
+   printk(KERN_DEBUG "High DW host address for mig2host transfer is 0x%x\n",host_addr_hi);
 #endif
 
    // if DMA transfer then start controller
    fos_write_reg(fos, R_MIG2HOST_READ_ADDR, cmd->mig_base_address);
    fos_write_reg(fos, R_MIG2HOST_STRIDE, row_stride);
    fos_write_reg(fos, R_MIG2HOST_COL_COUNT, num_columns);
-   fos_write_reg64(fos, R_MIG2HOST_WRITE_ADDR, host_addr);
-   //   fos_write_reg(fos, R_MIG2HOST_WRITE_ADDR, fos->dma_handle + cmd->host_offset_addr);
-   //   fos_write_reg(fos, R_MIG2HOST_WRITE_ADDR_HI, 0);
+ //  fos_write_reg64(fos, R_MIG2HOST_WRITE_ADDR, host_addr);
+   fos_write_reg(fos, R_MIG2HOST_WRITE_ADDR, host_addr_lo);
+   fos_write_reg(fos, R_MIG2HOST_WRITE_ADDR_HI, host_addr_hi);
    fos_write_reg(fos, R_MIG2HOST_ROW_COUNT, num_rows);
 
    return 0;
@@ -476,7 +482,8 @@ int FOS_transfer_to_user(struct fos_drvdata *fos, struct FOS_transfer_user_struc
       count++;
       if (count > 20000) {
          printk(KERN_DEBUG "transfer timed out, count = %d\n",count);
-         return -1;
+      //   return -1;
+         status = STAT_MIG2HOST_INT_FLAG;
       }
    }
 
@@ -566,7 +573,8 @@ int FOS_transfer_to_user(struct fos_drvdata *fos, struct FOS_transfer_user_struc
          count++;
          if (count > 20000) {
             printk(KERN_DEBUG "transfer timed out, count = %d\n",count);
-            return -1;
+     //       return -1;
+            status = STAT_MIG2HOST_INT_FLAG;
          }
       }
 

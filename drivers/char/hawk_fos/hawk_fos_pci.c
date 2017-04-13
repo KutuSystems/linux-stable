@@ -164,7 +164,7 @@ static long fos_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
    struct FOS_debug_struct debug_cmd;
    struct FOS_int_status_struct int_status;
 
-   printk(KERN_DEBUG "<%s> ioctl: entered fos_ioctl\n", MODULE_NAME);
+   //printk(KERN_DEBUG "<%s> ioctl: entered fos_ioctl\n", MODULE_NAME);
 
    switch (cmd) {
       case FOS_USER_RESET:
@@ -468,6 +468,12 @@ irqreturn_t fos_isr(int irq, void *data)
 
 
    fos->irq_count++;
+
+   if (fos->irq_count > 10000) {
+      // disable interrupts
+      fos->int_active_mask = 0;
+      fos_write_reg(fos, R_INTERRUPT, 0);
+   }
 
    //spin_unlock(&fos->lock);
    spin_unlock_irqrestore(&fos->lock, flags);
