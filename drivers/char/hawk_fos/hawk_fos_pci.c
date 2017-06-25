@@ -341,12 +341,12 @@ static long fos_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
          }
 
          if (debug_cmd.cmd == FOS_DEBUG_WRITE){
-            fosdma_write_reg(fos, debug_cmd.reg, debug_cmd.data);
+            fos_write_reg(fos, debug_cmd.reg, debug_cmd.data);
             return 0;
          }
 
          if (debug_cmd.cmd == FOS_DEBUG_READ)
-            debug_cmd.data = fosdma_read_reg(fos, debug_cmd.reg);
+            debug_cmd.data = fos_read_reg(fos, debug_cmd.reg);
 
          if (copy_to_user(arg_ptr, &debug_cmd, sizeof(debug_cmd))) {
             return -EFAULT;
@@ -424,8 +424,8 @@ irqreturn_t fos_isr(int irq, void *data)
 			}
 			tfer.mig_base_address = (fos->auto_row_stride*fos->auto_mig_addr);
 			tfer.mig_stride = fos->auto_row_stride;
-			tfer.num_rows = 128;						
-						
+			tfer.num_rows = 128;
+
 
 			// send data transfer command
 			if (FOS_tfer_mig2host(fos, &tfer))
@@ -434,7 +434,7 @@ irqreturn_t fos_isr(int irq, void *data)
 			}else{
 				//prepare for next transfer
 				if(fos->auto_channel_mode == DUAL_CHANNEL_MODE){
-					fos->auto_transfer_ch2 = 1;		
+					fos->auto_transfer_ch2 = 1;
 				}else{
 					fos->auto_transfer_ch2 = 0;
 					fos->auto_mig_addr+=128;

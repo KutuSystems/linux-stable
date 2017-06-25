@@ -207,6 +207,7 @@ struct fos_drvdata {
    void __iomem *base;
    void __iomem *dma_base;
    uint32_t config_state;
+   uint32_t status_reg;
    char *dma_addr;
    dma_addr_t dma_handle;
    struct FOS_read_data_struct repeat_read_cmd;
@@ -217,27 +218,28 @@ struct fos_drvdata {
 static inline void fos_write_reg(struct fos_drvdata *fos, unsigned int reg, uint32_t val)
 {
 	writel(val, fos->base + reg);
+   fos->status_reg = readl(fos->base);
 }
 
-static inline void fos_write_reg64(struct fos_drvdata *fos, unsigned int reg, uint64_t val)
-{
-	writeq(val, fos->base + reg);
-}
+//static inline void fos_write_reg64(struct fos_drvdata *fos, unsigned int reg, uint64_t val)
+//{
+//	writeq(val, fos->base + reg);
+//}
 
 static inline uint32_t fos_read_reg(struct fos_drvdata *fos, unsigned int reg)
 {
 	return(readl(fos->base + reg));
 }
 
-static inline void fosdma_write_reg(struct fos_drvdata *fos, unsigned int reg, uint32_t val)
-{
-	writel(val, fos->dma_base + reg);
-}
+//static inline void fosdma_write_reg(struct fos_drvdata *fos, unsigned int reg, uint32_t val)
+//{
+//	writel(val, fos->dma_base + reg);
+//}
 
-static inline uint32_t fosdma_read_reg(struct fos_drvdata *fos, unsigned int reg)
-{
-	return(readl(fos->dma_base + reg));
-}
+//static inline uint32_t fosdma_read_reg(struct fos_drvdata *fos, unsigned int reg)
+//{
+//	return(readl(fos->dma_base + reg));
+//}
 
 //
 //
