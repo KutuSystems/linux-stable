@@ -165,7 +165,10 @@ enum fos_user_cmds
    FOS_USER_RESET,
    FOS_USER_SET_CLK,
    FOS_USER_SET_PULSE,
-   FOS_USER_SET_ADC_OFFSET,
+   FOS_USER_SET_ADC0_OFFSET,
+   FOS_USER_SET_ADC1_OFFSET,
+   FOS_USER_READ_ADC0_OFFSET,
+   FOS_USER_READ_ADC1_OFFSET,
    FOS_USER_SET_ROW_STRIDE,
    FOS_USER_RUN_TEST,
    FOS_USER_STATUS,
@@ -304,7 +307,7 @@ struct FOS_debug_struct {
 #define FOS_USER_RESET              _IOWR(FOS_IOCTL_BASE, 0x81, struct FOS_cmd_struct)
 #define FOS_USER_SET_CLK            _IOWR(FOS_IOCTL_BASE, 0x82, struct FOS_cmd_struct)
 #define FOS_USER_SET_PULSE          _IOWR(FOS_IOCTL_BASE, 0x83, struct FOS_cmd_struct)
-#define FOS_USER_SET_ADC_OFFSET     _IOWR(FOS_IOCTL_BASE, 0x84, struct FOS_cmd_struct)
+
 #define FOS_USER_SET_ROW_STRIDE     _IOWR(FOS_IOCTL_BASE, 0x85, struct FOS_cmd_struct)
 #define FOS_USER_RUN_TEST           _IOWR(FOS_IOCTL_BASE, 0x86, struct FOS_cmd_struct)
 #define FOS_USER_STATUS             _IOWR(FOS_IOCTL_BASE, 0x87, struct FOS_cmd_struct)
@@ -326,6 +329,9 @@ struct FOS_debug_struct {
 #define FOS_TRANSFER_TO_USER        _IOWR(FOS_IOCTL_BASE, 0x97, struct FOS_cmd_struct)
 #define FOS_AUTO_ACQUISITION			_IOWR(FOS_IOCTL_BASE, 0x98, struct FOS_cmd_struct)
 #define FOS_AUTO_BLOCK_COUNT			_IOWR(FOS_IOCTL_BASE, 0x99, struct FOS_cmd_struct)
-
+#define FOS_USER_SET_ADC0_OFFSET    _IOWR(FOS_IOCTL_BASE, 0x9a, struct FOS_cmd_struct)
+#define FOS_USER_SET_ADC1_OFFSET    _IOWR(FOS_IOCTL_BASE, 0x9b, struct FOS_cmd_struct)
+#define FOS_USER_READ_ADC0_OFFSET    _IOWR(FOS_IOCTL_BASE, 0x9c, struct FOS_cmd_struct)
+#define FOS_USER_READ_ADC1_OFFSET    _IOWR(FOS_IOCTL_BASE, 0x9d, struct FOS_cmd_struct)
 
 #endif /* _FOS_H */

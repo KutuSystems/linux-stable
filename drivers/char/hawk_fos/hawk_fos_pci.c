@@ -206,8 +206,26 @@ static long fos_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
          ret = FOS_Set_Pulse(fos, arg_ptr);
          return ret;
 
-      case FOS_USER_SET_ADC_OFFSET:
-         fos_write_reg(fos, R_ADC_OFFSET, arg);
+      case FOS_USER_SET_ADC0_OFFSET:
+         fos_write_reg(fos, R_ADC0_OFFSET, arg);
+         return 0;
+
+      case FOS_USER_SET_ADC1_OFFSET:
+         fos_write_reg(fos, R_ADC1_OFFSET, arg);
+         return 0;
+
+      case FOS_USER_READ_ADC0_OFFSET:
+			ret = FOS_ADC0_Offset(fos);
+         if (copy_to_user(arg_ptr, &ret, sizeof(u32))) {
+            return -EFAULT;
+         }
+         return 0;
+
+      case FOS_USER_READ_ADC1_OFFSET:
+			ret = FOS_ADC1_Offset(fos);
+         if (copy_to_user(arg_ptr, &ret, sizeof(u32))) {
+            return -EFAULT;
+         }
          return 0;
 
       case FOS_USER_SET_ROW_STRIDE:

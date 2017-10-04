@@ -40,6 +40,32 @@
 //
 // status if system is running test, sweep or is idle
 //
+
+u32 FOS_ADC0_Offset(struct fos_drvdata *fos){
+   u32 ADC_Offset;
+
+   ADC_Offset = fos_read_reg(fos, R_ADC_OFFSET_READ_BASE);
+
+	ADC_Offset = ADC_Offset & 0XFFFF;
+
+   return ADC_Offset;
+}
+//
+
+u32 FOS_ADC1_Offset(struct fos_drvdata *fos){
+   u32 ADC_Offset;
+
+   ADC_Offset = fos_read_reg(fos, R_ADC_OFFSET_READ_BASE);
+
+	ADC_Offset = ADC_Offset >> 16;
+
+	ADC_Offset = ADC_Offset & 0XFFFF;
+
+   return ADC_Offset;
+
+}
+//
+
 u32 FOS_Status(struct fos_drvdata *fos)
 {
    u32 status;
@@ -270,7 +296,7 @@ int FOS_Auto_Acquisition(struct fos_drvdata *fos, void *user_ptr)
 
 	//Stop Capture
    if(cmd.capture == STOP_CAPTURE) {
-      fos_write_reg(fos, R_RUN_TEST, STOP_TEST);
+      //fos_write_reg(fos, R_RUN_TEST, STOP_TEST);
       fos_write_reg(fos, R_BOTDA_END_FREQ, REPEAT_COUNT);
 		fos->auto_active = 0;
 		fos->auto_transfer_ch2 = 0;
@@ -321,6 +347,10 @@ int FOS_Auto_Acquisition(struct fos_drvdata *fos, void *user_ptr)
    fos_write_reg(fos, R_MEM_STRIDE, cmd.row_stride);
 
    if (cmd.capture == START_CAPTURE) {
+		fos->auto_transfer_ch2 = 0;
+		fos->auto_mig_addr = 0;
+		fos->auto_block_count=-1;
+
       fos_write_reg(fos, R_RUN_TEST, START_TEST);
 		fos->auto_active = 1;
 		fos->auto_channel_mode = cmd.channel_mode;
@@ -332,7 +362,6 @@ int FOS_Auto_Acquisition(struct fos_drvdata *fos, void *user_ptr)
 		fos->int_active_mask |= BIT_INT_MIG2HOST;
 		fos->int_active_mask |= BIT_INT_ARBITER;
 		fos_write_reg(fos, R_INTERRUPT, fos->int_active_mask|BIT_CLR_MIG2HOST);
-
 #ifdef DEBUG
       printk(KERN_DEBUG "Start Auto Acquisition\n");
 #endif

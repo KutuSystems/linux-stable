@@ -23,6 +23,7 @@
 #define FOS_BASE                 0x43C00000
 
 #define R_FOS_SPI_READ_BASE      0x0800
+#define R_ADC_OFFSET_READ_BASE	0x1800
 #define R_FOS_SWEEP_RAM_BASE     0x1000
 #define R_FOS_DAC_LOOKUP_BASE    0x2000
 #define R_FREQUENCY_STATUS       0x3000
@@ -38,9 +39,9 @@
 #define R_BOTDA_END_FREQ         0x001C   // Write end frequency of BOTDA scan
 #define R_ADC_COUNT              0x0020   // Write number of ADC samples to store * 16
 #define R_BOTDA_COUNT            0x0024   // Write number of accumulations to perform
-#define R_ADC_OFFSET             0x0028   // Write adc offset value to remove
-#define R_SPI_PORT_SPEED         0x002C   // Set SPI port speed
-#define R_RSVD1                  0x0030
+#define R_ADC0_OFFSET            0x0028   // Write adc offset value to remove
+#define R_ADC1_OFFSET            0x002C   // Write adc offset value to remove
+#define R_SPI_PORT_SPEED         0x0030   // Set SPI port speed
 #define R_RSVD2                  0x0034
 #define R_RSVD3                  0x0038
 #define R_RSVD4                  0x003C
@@ -258,6 +259,15 @@ static inline uint32_t fos_read_reg(struct fos_drvdata *fos, unsigned int reg)
 //
 //
 
+//
+
+u32 FOS_ADC0_Offset(struct fos_drvdata *fos);
+
+//
+
+u32 FOS_ADC1_Offset(struct fos_drvdata *fos);
+
+//
 u32 FOS_Status(struct fos_drvdata *fos);
 
 //
@@ -266,7 +276,7 @@ u32 FOS_Status(struct fos_drvdata *fos);
 // Open FOS system and mmap registers for user access.
 //
 // Returns pointer to virtual address.
-//
+
 u32 FOS_Open(u32 init_fpga);
 
 //
